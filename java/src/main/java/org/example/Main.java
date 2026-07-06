@@ -14,8 +14,8 @@ public class Main {
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
     private static final String POSTS_ENDPOINT = "https://jsonplaceholder.typicode.com/posts";
-    private static final String OUTPUT_DIRECTORY_NAME = "posts_java";
-
+    private static final String OUTPUT_DIRECTORY_NAME = getBaseDir();
+    
     public static void main(String[] args) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -33,6 +33,18 @@ public class Main {
             LOG.severe("Failed to download posts: " + e.getMessage());
             System.exit(1);
         }
+    }
+
+    private static String getBaseDir() {
+        String currentPath = System.getProperty("user.dir");
+        switch (currentPath) {
+            case "java":
+                return "posts_java";
+            case "data-from-api":
+                return Path.of("java", "posts_java").toString();
+            default:
+                return Path.of("data-from-api", "java", "posts_java").toString();
+            }
     }
 
 }
