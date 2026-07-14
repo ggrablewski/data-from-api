@@ -61,8 +61,7 @@ public class PostApiClient {
     private void ensureSuccessful(HttpResponse<String> response) {
         int status = response.statusCode();
         if (status < 200 || status >= 300) {
-            throw new PostFetchException(
-                    "Unexpected HTTP status " + status + " from " + postsEndpoint);
+            throw new PostFetchException("Unexpected HTTP status " + status + " from " + postsEndpoint);
         }
     }
 

@@ -1,11 +1,14 @@
 package org.example;
 
+import org.example.model.Post;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.logging.Logger;
+import java.util.List;
 
 /**
  * Application entry point
@@ -24,14 +27,19 @@ public class Main {
 
         PostApiClient apiClient = new PostApiClient(httpClient, objectMapper, POSTS_ENDPOINT);
         PostFileWriter fileWriter = new PostFileWriter(objectMapper, Path.of(OUTPUT_DIRECTORY_NAME));
-        PostDownloadService service = new PostDownloadService(apiClient, fileWriter);
+        PostDownloadService downloadService = new PostDownloadService(apiClient);
 
         try {
-            int written = service.downloadAllPosts();
-            LOG.info(() -> String.format("Completed. %d posts saved to %s.", written, OUTPUT_DIRECTORY_NAME));
-        } catch (PostFetchException | PostStorageException e) {
+            List<Post> posts = downloadService.downloadAllPosts();
+            fileWriter.writeAllPosts(posts);
+
+            LOG.info(() -> String.format("Completed. %d posts saved to %s.", posts.size(), OUTPUT_DIRECTORY_NAME));
+        } catch (PostFetchException e) {
             LOG.severe("Failed to download posts: " + e.getMessage());
             System.exit(1);
+        } catch (PostStorageException e) {
+            LOG.severe("Failed to save posts: " + e.getMessage());
+            System.exit(2);
         }
     }
 

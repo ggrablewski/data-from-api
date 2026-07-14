@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Saves posts to disk as JSON files, one file per post.
@@ -23,11 +25,26 @@ public class PostFileWriter {
     }
 
     /**
+     * Writes all posts to the output directory.
+     *
+     * @param posts the list of posts to write
+     * @return the list of paths where the posts were written
+     * @throws PostStorageException if serialization or writing fails, including failure to create the output directory
+     */
+    public List<Path> writeAllPosts(List<Post> posts) throws PostStorageException {
+        fetchOutputDirectory();
+
+        return posts.stream()
+                .map(this::write)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Creates the output directory if it does not already exist.
      *
      * @throws PostStorageException if the directory cannot be created
      */
-    public void fetchOutputDirectory() {
+    protected void fetchOutputDirectory() {
         try {
             Files.createDirectories(outputDirectory);
         } catch (IOException e) {
@@ -42,7 +59,7 @@ public class PostFileWriter {
      * @return the path the post was written to
      * @throws PostStorageException if serialization or writing fails
      */
-    public Path write(Post post) {
+    protected Path write(Post post) {
         Objects.requireNonNull(post, "post to be saved is missing");
         Path target = outputDirectory.resolve("post_" + String.format("%03d", post.id()) + ".json");
         try {
@@ -55,4 +72,5 @@ public class PostFileWriter {
             throw new PostStorageException("Failed to write " + target, e);
         }
     }
+
 }
