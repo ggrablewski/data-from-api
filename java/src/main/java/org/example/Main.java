@@ -45,7 +45,9 @@ public class Main {
 
     private static String getBaseDir() {
         String currentPath = System.getProperty("user.dir");
-        switch (currentPath) {
+        String[] pathArray = currentPath.split("\\\\");
+        String userDir = pathArray[pathArray.length-1];
+        switch (userDir) {
             case "java":
                 return "posts_java";
             case "data-from-api":
